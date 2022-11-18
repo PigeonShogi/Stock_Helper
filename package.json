@@ -1,0 +1,26 @@
+{
+  "name": "stock_helper",
+  "version": "1.0.0",
+  "description": "這是一個爬蟲與瀏覽器自動化的小型專案。實現爬蟲每日爬取投資標的股價、每月追蹤個股近十年平均股利等功能。",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "browser": "node tools/browser-automation.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "PigeonShogi",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "selenium-webdriver": "^4.6.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.27.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-n": "^15.5.1",
+    "eslint-plugin-promise": "^6.1.1"
+  }
+}
