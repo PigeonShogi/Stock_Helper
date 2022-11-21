@@ -13,7 +13,9 @@
   "author": "PigeonShogi",
   "license": "MIT",
   "dependencies": {
+    "@google-cloud/local-auth": "^2.1.0",
     "dotenv": "^16.0.3",
+    "googleapis": "^105.0.0",
     "selenium-webdriver": "^4.6.1"
   },
   "devDependencies": {
