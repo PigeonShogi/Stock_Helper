@@ -4,18 +4,15 @@ const path = require('path')
 const process = require('process')
 const { authenticate } = require('@google-cloud/local-auth')
 const { google } = require('googleapis')
+const stocks = require('../../data/stock.json') // 引用個股資料
 
-// If modifying these scopes, delete token.json.
+// SCOPES 經修改後應刪除 token.json
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
-// The file token.json stores the user's access and refresh tokens, and is
-// created automatically when the authorization flow completes for the first
-// time.
 const TOKEN_PATH = path.join(process.cwd(), 'tools/google_sheets/token.json')
 const CREDENTIALS_PATH = path.join(process.cwd(), 'tools/google_sheets/credentials.json')
 
 /**
- * Reads previously authorized credentials from the save file.
- *
+ * 從既有檔案讀取已授權憑證
  * @return {Promise<OAuth2Client|null>}
  */
 async function loadSavedCredentialsIfExist () {
@@ -29,8 +26,7 @@ async function loadSavedCredentialsIfExist () {
 }
 
 /**
- * Serializes credentials to a file comptible with GoogleAUth.fromJSON.
- *
+ * 將憑證序列化為與 Google AUth.fromJSON 相容的文件
  * @param {OAuth2Client} client
  * @return {Promise<void>}
  */
@@ -47,10 +43,7 @@ async function saveCredentials (client) {
   await fs.writeFile(TOKEN_PATH, payload)
 }
 
-/**
- * Load or request or authorization to call APIs.
- *
- */
+// 加載、請求或授權調用 API
 async function authorize () {
   let client = await loadSavedCredentialsIfExist()
   if (client) {
@@ -67,24 +60,66 @@ async function authorize () {
 }
 
 /**
- * 輸出欲連接資料表的資料
- * @param {google.auth.OAuth2} auth The authenticated Google OAuth client.
+ * 將爬蟲擷取的股價寫入資料表
+ * @param {google.auth.OAuth2} auth 經過身份驗證的 Google OAuth 用戶
  */
-async function getSheet (auth) {
+async function updatePrices (auth, array) {
   const sheets = google.sheets({ version: 'v4', auth })
-  const res = await sheets.spreadsheets.values.get({
+  const res = await sheets.spreadsheets.values.update({
     spreadsheetId: process.env.SHEET_ID,
-    range: 'Sheet1'
+    range: 'Sheet1!C2:C',
+    valueInputOption: 'USER_ENTERED',
+    resource: {
+      values: array
+    }
   })
-  const rows = res.data.values
-  if (!rows || rows.length === 0) {
-    console.log('No data found.')
-    return
-  }
-  console.log('表單欄位名稱：')
-  console.log(rows)
+  console.info(`HTTP狀態碼：${res.status} => Google Sheet 資料已更新`)
 }
 
-authorize()
-  .then(getSheet)
-  .catch(console.error)
+/**
+ * 將 data/stock.json 儲存的股票代號、商品名稱插入 Google Sheet
+ * @param {google.auth.OAuth2} auth 經過身份驗證的 Google OAuth 用戶
+ */
+async function batchInsertCodeAndName (auth) {
+  // 從 data/stock.json 引入股票代號、商品名稱
+  const codeArray = stocks.map(stock => { return [stock.code] })
+  const nameArray = stocks.map(stock => { return [stock.name] })
+  const sheets = google.sheets({ version: 'v4', auth })
+  // 先清空股票代號及商品名稱欄位的所有資料，以免插入結果不如預期。
+  await sheets.spreadsheets.values.clear({
+    spreadsheetId: process.env.SHEET_ID,
+    range: 'Sheet1!A2:B'
+  })
+  // 插入股票代號、商品名稱
+  const res = await sheets.spreadsheets.values.batchUpdate({
+    spreadsheetId: process.env.SHEET_ID,
+    resource: {
+      /*
+      為避免股票代號 0056 被解析為數字 56，
+      valueInputOption 的值需為 RAW 而非 USER_ENTERED
+      */
+      valueInputOption: 'RAW',
+      data: [
+        {
+          range: 'Sheet1!A2:A',
+          values: codeArray
+        },
+        {
+          range: 'Sheet1!B2:B',
+          values: nameArray
+        }
+      ]
+    }
+  })
+  console.info(`HTTP狀態碼：${res.status} => 股票代號、商品名稱已經插入 Google Sheet`)
+}
+
+// data/stock.json 內容有變動時，執行下列註解程式，以重新插入股票代號及商品名稱。
+// authorize()
+//   .then(auth => batchInsertCodeAndName(auth))
+//   .catch(console.error)
+
+module.exports = {
+  authorize,
+  updatePrices
+}
