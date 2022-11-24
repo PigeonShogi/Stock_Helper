@@ -73,7 +73,24 @@ async function updatePrices (auth, array) {
       values: array
     }
   })
-  console.info(`HTTP狀態碼：${res.status} => Google Sheet 資料已更新`)
+  console.info(`HTTP狀態碼：${res.status} => Google Sheet 已更新最近成交價`)
+}
+
+/**
+ * 將爬蟲擷取的近十年股利平均（股利現金流）寫入資料表
+ * @param {google.auth.OAuth2} auth 經過身份驗證的 Google OAuth 用戶
+ */
+async function updateDividendCashFlow (auth, array) {
+  const sheets = google.sheets({ version: 'v4', auth })
+  const res = await sheets.spreadsheets.values.update({
+    spreadsheetId: process.env.SHEET_ID,
+    range: 'Sheet1!D2:D',
+    valueInputOption: 'USER_ENTERED',
+    resource: {
+      values: array
+    }
+  })
+  console.info(`HTTP狀態碼：${res.status} => 已追蹤股利現金流並寫入 Google Sheet`)
 }
 
 /**
@@ -121,5 +138,6 @@ async function batchInsertCodeAndName (auth) {
 
 module.exports = {
   authorize,
+  updateDividendCashFlow,
   updatePrices
 }
