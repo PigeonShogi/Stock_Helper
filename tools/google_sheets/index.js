@@ -77,6 +77,37 @@ async function updatePrices (auth, array) {
 }
 
 /**
+ * 在爬蟲更新資料前，將資料依照股票代號由小至大排序。
+ * @param {google.auth.OAuth2} auth 經過身份驗證的 Google OAuth 用戶
+ */
+async function sortByCodeASC (auth) {
+  const sheets = google.sheets({ version: 'v4', auth })
+  const res = await sheets.spreadsheets.batchUpdate({
+    spreadsheetId: process.env.SHEET_ID,
+    resource: {
+      requests: [
+        {
+          sortRange: {
+            range: {
+              startColumnIndex: 0,
+              startRowIndex: 1
+            },
+            sortSpecs: [
+              {
+                sortOrder: 'ASCENDING'
+              }
+            ]
+          }
+        }
+      ]
+    }
+  })
+  console.info(`HTTP狀態碼：${res.status} => Google Sheet 已按照股票代號排序資料`)
+  // 本函式不會單獨使用，後面會銜接寫入資料的函式，因此在此回傳 auth 供下個函式使用。
+  return auth
+}
+
+/**
  * 將爬蟲擷取的近十年股利平均（股利現金流）寫入資料表
  * @param {google.auth.OAuth2} auth 經過身份驗證的 Google OAuth 用戶
  */
@@ -138,6 +169,7 @@ async function batchInsertCodeAndName (auth) {
 
 module.exports = {
   authorize,
+  sortByCodeASC,
   updateDividendCashFlow,
   updatePrices
 }

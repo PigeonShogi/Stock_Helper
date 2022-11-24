@@ -6,7 +6,7 @@ const driverOn = new Builder().setChromeOptions(disableGpu, headless, imageOff, 
 const stocks = require('../data/stock.json') // 引用個股資料
 const crawler = require('./crawler') // 引用爬蟲模組
 // 引用 Google Sheets API 相關函式
-const { authorize, updateDividendCashFlow, updatePrices } = require('./google_sheets/index')
+const { authorize, updateDividendCashFlow, updatePrices, sortByCodeASC } = require('./google_sheets/index')
 
 // 瀏覽器自動化腳本：每日更新股價
 async function browserAutomationDaily () {
@@ -16,6 +16,7 @@ async function browserAutomationDaily () {
   const prices = await crawler.getPrices(driver, stocks)
   // 將爬取的股價寫入 Google Sheet。GCP API 採用 Promise 語法。
   authorize()
+    .then(auth => sortByCodeASC(auth))
     .then(auth => updatePrices(auth, prices))
     .catch(console.error)
   await driver.quit()
@@ -36,4 +37,5 @@ async function browserAutomationMonthly () {
   console.info('爬蟲結束工作')
 }
 
-browserAutomationMonthly()
+browserAutomationDaily()
+// browserAutomationMonthly()
