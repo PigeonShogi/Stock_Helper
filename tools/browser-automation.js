@@ -19,7 +19,8 @@ async function browserAutomationDaily () {
     .then(auth => sortByCodeASC(auth))
     .then(auth => updatePrices(auth, prices))
     .catch(console.error)
-  await driver.quit()
+  // 為避免執行排程程式時發生 NoSuchSessionError，停用瀏覽器關閉功能。
+  // await driver.quit()
   console.info('爬蟲結束工作')
 }
 
@@ -33,9 +34,12 @@ async function browserAutomationMonthly () {
   authorize()
     .then(auth => updateDividendCashFlow(auth, dividendCashFlow))
     .catch(console.error)
-  await driver.quit()
+  // 為避免執行排程程式時發生 NoSuchSessionError，停用瀏覽器關閉功能。
+  // await driver.quit()
   console.info('爬蟲結束工作')
 }
 
-browserAutomationDaily()
-// browserAutomationMonthly()
+module.exports = {
+  browserAutomationDaily,
+  browserAutomationMonthly
+}

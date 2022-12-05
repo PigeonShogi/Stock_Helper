@@ -6,6 +6,8 @@
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
+    "daily": "node tools/schedule-daily.js",
+    "monthly": "node tools/schedule-monthly.js",
     "browser": "node tools/browser-automation.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -14,6 +16,7 @@
   "license": "MIT",
   "dependencies": {
     "@google-cloud/local-auth": "^2.1.0",
+    "cron": "^2.1.0",
     "dotenv": "^16.0.3",
     "googleapis": "^105.0.0",
     "selenium-webdriver": "^4.6.1"
