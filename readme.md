@@ -30,13 +30,17 @@ $ npm run daily
 $ npm run monthly
 ```
 ### 開發環境
+```
 macOS Monterey: 12.2.1 (21D62)
 Google Chrome: 107.0.5304.87 (正式版本) (x86_64)
+```
 ### 主要開發工具
+```
 Node.js 18.12.1
 selenium-webdriver 4.6.1
 googleapis 105.0.0
 @google-cloud/local-auth 2.1.0
 cron 2.1.0
+```
 ##### 提示
 * 本專案也可搭配排程管理套件 pm2
