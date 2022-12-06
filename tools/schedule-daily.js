@@ -3,7 +3,7 @@ const CronJob = require('cron').CronJob
 const { browserAutomationDaily } = require('./browser-automation')
 
 const dailyJob = new CronJob(
-  process.env.SCHEDULE_TIME_DAILY1,
+  process.env.SCHEDULE_TIME_DAILY,
   async () => {
     console.info('排程作業啟用中')
     let isCrawlerRun = false // 用以檢查爬蟲是否執行中
